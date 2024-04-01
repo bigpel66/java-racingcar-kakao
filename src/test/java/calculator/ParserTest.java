@@ -27,15 +27,10 @@ class ParserTest {
         assertThatCode(() -> Parser.of("1,2,3")).doesNotThrowAnyException();
     }
 
-    @Test
-    void parse_메서드는_입력_값을_이용하여_Numbers_객체를_생성() {
-        assertThat(Parser.of("1").parse()).isInstanceOf(Numbers.class);
-    }
-
     @ParameterizedTest
     @MethodSource("getParserToNumbersInput")
-    void Parser의_parse_메서드는_적절한_Numbers_객체를_반환(String input, List<Integer> list) {
-        assertThat(Parser.of(input).parse()).isEqualTo(Numbers.of(list));
+    void Parser의_parse_메서드는_정수_타입의_list_일급_콜렉션을_반환(String input, List<Integer> list) {
+        assertThat(Parser.of(input).parse()).isEqualTo(list);
     }
 
     private static Stream<Arguments> getParserToNumbersInput() {

@@ -11,9 +11,11 @@ public final class Calculator {
     public static int sum(String input) {
         try {
             validate(input);
-            Numbers numbers = Parser.of(input).parse();
+            new Numbers(new Parser(input));
+
+            Numbers numbers = Numbers.of(Parser.of(input).parse());
             validate(numbers);
-            return numbers.list().stream()
+            return numbers.values().stream()
                     .mapToInt(Integer::intValue)
                     .sum();
         } catch (NullPointerException | IllegalArgumentException ex) {
@@ -36,7 +38,7 @@ public final class Calculator {
     }
 
     private static void checkNonNegative(Numbers numbers) {
-        numbers.list().stream()
+        numbers.values().stream()
                 .filter(e -> e < 0)
                 .findFirst()
                 .ifPresent(e -> {

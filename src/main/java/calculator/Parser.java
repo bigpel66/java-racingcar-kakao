@@ -15,6 +15,7 @@ public final class Parser {
     private static final String DEFAULT_DELIMITER = ",|:";
     private static final int DELIMITER_CAPTURE_POSITION = 1;
     private static final int TARGET_CAPTURE_POSITION = 2;
+
     private final String input;
     private final String target;
     private final String delimiter;
@@ -24,8 +25,8 @@ public final class Parser {
     }
 
     private Parser(String input) {
+        validateInput(input);
         this.input = input;
-        validateInput();
         if (!input.startsWith(CUSTOM_DELIMITER_PREFIX)) {
             this.delimiter = DEFAULT_DELIMITER;
             target = input;
@@ -35,20 +36,20 @@ public final class Parser {
         this.delimiter = m.group(DELIMITER_CAPTURE_POSITION);
         this.target = m.group(TARGET_CAPTURE_POSITION);
     }
-    
-    private void validateInput() {
-        checkInputBlank();
-        checkInputContainsRegex();
+
+    private void validateInput(String input) {
+        checkInputBlank(input);
+        checkInputContainsRegex(input);
     }
 
-    private void checkInputBlank() {
+    private void checkInputBlank(String input) {
         Objects.requireNonNull(input);
         if (input.isBlank()) {
             throw new IllegalArgumentException("파싱 대상 문자열이 비어있습니다.");
         }
     }
 
-    private void checkInputContainsRegex() {
+    private void checkInputContainsRegex(String input) {
         Matcher matcher = FORBIDDEN_DELIMITER_PATTERN.matcher(input);
         if (matcher.find()) {
             throw new IllegalArgumentException("입력 값에는 정규표현식 예약어를 사용할 수 없습니다.");
@@ -63,12 +64,11 @@ public final class Parser {
         return m;
     }
 
-    public Numbers parse() {
+    public List<Integer> parse() {
         try {
-            List<Integer> list = Arrays.stream(target.split(delimiter))
+            return Arrays.stream(target.split(delimiter))
                     .map(Integer::parseInt)
                     .collect(Collectors.toList());
-            return Numbers.of(list);
         } catch (NumberFormatException ex) {
             throw new InputMismatchException("파싱 대상 문자열은 숫자가 아닙니다.");
         }

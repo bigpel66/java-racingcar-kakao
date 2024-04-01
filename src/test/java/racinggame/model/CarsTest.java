@@ -1,7 +1,8 @@
-package racinggame;
+package racinggame.model;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import racinggame.strategy.RandomStrategy;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,12 +17,12 @@ public class CarsTest {
     void Cars는_참가_신청된_이름을_바탕으로_생성() {
         Cars cars = Cars.of(
                 Stream.of("jseo", "glen", "sage")
-                        .map(Car::of)
+                        .map(Car::defaultStrategyOf)
                         .collect(Collectors.toList())
         );
-        assertThat(cars.list()).isEqualTo(
+        assertThat(cars.registeredCars()).isEqualTo(
                 Stream.of("jseo", "glen", "sage")
-                        .map(Car::of)
+                        .map(Car::defaultStrategyOf)
                         .collect(Collectors.toList())
         );
     }
@@ -30,46 +31,33 @@ public class CarsTest {
     void 중복_참여된_자동차들은_RuntimeException을_발생() {
         assertThatThrownBy(() -> Cars.of(
                 Stream.of("jseo", "jseo")
-                        .map(Car::of)
+                        .map(Car::defaultStrategyOf)
                         .collect(Collectors.toList())
         )).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void moveAll_메서드를_이용하여_자동차들의_전진을_일괄적으로_수행() {
+        RandomStrategy randomStrategy = () -> 4;
         Cars cars = Cars.of(
-                List.of(overriddenCar("jseo"), overriddenCar("glen"), overriddenCar("sage"))
+                List.of(
+                        Car.of("jseo", randomStrategy),
+                        Car.of("glen", randomStrategy),
+                        Car.of("sage", randomStrategy)
+                )
         );
         cars.moveAll();
-        cars.list().forEach(car -> assertThat(car.offset()).isEqualTo(1));
-    }
-
-    private Car overriddenCar(String name) {
-        return new Car(name) {
-            @Override
-            protected int pickEngineValue() {
-                return 4;
-            }
-        };
-    }
-
-    @Test
-    void statusAll_메서드를_이용하여_자동차들의_상태를_일괄적으로_파악() {
-        Cars cars = Cars.of(
-                List.of(overriddenCar("jseo"), overriddenCar("glen"), overriddenCar("sage"))
-        );
-        cars.moveAll();
-        assertThat(cars.statusAll()).isEqualTo("jseo : -\nglen : -\nsage : -\n");
+        cars.registeredCars().forEach(car -> assertThat(car.offset()).isEqualTo(1));
     }
 
     @Test
     void 자동차들의_list의_불변성을_확인() {
         Cars cars = Cars.of(
                 Stream.of("jseo", "glen", "sage")
-                        .map(Car::of)
+                        .map(Car::defaultStrategyOf)
                         .collect(Collectors.toList())
         );
-        assertThatThrownBy(() -> cars.list().add(Car.of("fail")))
+        assertThatThrownBy(() -> cars.registeredCars().add(Car.defaultStrategyOf("fail")))
                 .isInstanceOf(UnsupportedOperationException.class);
     }
 }

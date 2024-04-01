@@ -1,16 +1,25 @@
 package racinggame;
 
+import racinggame.controller.RacingGame;
+import racinggame.model.Car;
+import racinggame.model.Cars;
+import racinggame.strategy.DefaultRandomStrategy;
+import racinggame.strategy.DefaultWinnerStrategy;
+import racinggame.view.ConsoleView;
+
 import java.util.stream.Collectors;
 
 public final class Application {
     public static void main(String[] args) {
+        ConsoleView view = ConsoleView.newInstance();
         RacingGame game = RacingGame.of(
-                Cars.of(ConsoleView.getCarNames().stream()
-                        .map(Car::of)
+                Cars.of(view.getCarNames().stream()
+                        .map(e -> Car.of(e, DefaultRandomStrategy.newInstance()))
                         .collect(Collectors.toList())),
-                ConsoleView.getTrial()
+                view.getTrial(),
+                view::recordStatus,
+                DefaultWinnerStrategy.newInstance()
         );
-        game.run();
-        ConsoleView.printResult(game.rounds(), game.winners());
+        view.printResult(game.start());
     }
 }
